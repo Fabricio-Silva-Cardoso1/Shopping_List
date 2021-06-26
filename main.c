@@ -18,19 +18,36 @@ char row[30];
 
 fp = fopen("List.txt","r");
 
-itemsList* itemList = NULL;
-itemList =(itemsList *)malloc(sizeof(itemsList));
+itemsList* itemHead = NULL;
+itemsList* newItem = NULL;
+itemsList* prevItem = NULL;
+itemsList* item = NULL;
+
+itemHead =(itemsList*) malloc (sizeof (itemsList));
+itemHead -> next = NULL;
 
 while(fgets(row,sizeof(row),fp) != NULL){
 
-    strcpy(itemList -> item, row);
+    newItem = (itemsList*) malloc (sizeof (itemsList));
+    newItem -> next = NULL;
+    strcpy(newItem -> item, row);
+
+        if(itemHead -> next == NULL){
+            itemHead -> next = newItem;
+        }else{
+            prevItem -> next = newItem;
+        }
+        prevItem = newItem;
+
     totalItems++;   
 }
 
-strcpy(itemList->item, row);
-printf("%s\n", itemList->item);
-itemList->next = NULL;
+item = itemHead -> next;
 
+while(item -> item != NULL){
+    printf("%s\n", item -> item);
+    item = item -> next;
+}
 
 /*printf("%s\n", itemList[0]);*/
 
