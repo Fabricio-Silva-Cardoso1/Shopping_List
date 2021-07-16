@@ -16,7 +16,7 @@ void insertList(FILE *);
 void removeList(FILE*);
 
 
-
+// Verificar a necessidade de passar o arquivo como parametro
 int main(){
 
 FILE *fp, *listcreated;
@@ -50,9 +50,6 @@ do  {
 
 while(option > 0 || option < 3 );
 
-/*fseek(fp, 0, SEEK_SET); /* Return the file pointer to the beggining*/
-/*fscanf(fp,"%[^\n]",c); /* Read each line of the file*/
-
     fclose(fp);
 return 0;
 }
@@ -64,7 +61,6 @@ return 0;
 int Menu(){
 
     int escolha;
-
 
     printf("Escolha uma opcao:\n");
     printf("1 - Ler TODOS os itens já cadastrados\n");
@@ -112,8 +108,12 @@ while(item -> item != NULL){
     printf("%s\n", item -> item);
     item = item -> next;
     }
-free(itemHead);
+
 fclose(list);
+
+free(itemHead);
+free(prevItem);
+free(item);
 
     return 0;
 }
@@ -125,7 +125,7 @@ void createList(FILE *createdlist){
     char exit[] = "sair";
     int sair = 2;
 
-    createdlist = fopen("Shopping_List.txt","w");
+    createdlist = fopen("ShoppingList.txt","w");
     headList = (itemsList*) malloc (sizeof(itemsList));
     headList -> next = NULL;
 
@@ -172,6 +172,14 @@ void createList(FILE *createdlist){
     
     system("clear");
 
+    fclose(createdlist);
+
+    free(itemList);
+    free(headList);
+    free(prevList);
+
+    return;
+
 }
 
 void editList(FILE* createList)
@@ -179,14 +187,18 @@ void editList(FILE* createList)
 
 int edit_option;
 
-    printf("Escolha uma opção\n");
+do  {
+
+    printf("Escolha uma opção:\n");
     printf("1- Inserir item na lista\n");
     printf("2- Remover item da lista\n");
+    scanf("%d",&edit_option);
+    fflush(stdin);
 
-    switch (edit_option)
-    {
+    switch (edit_option){
+            
     case 1:
-        editList(createList);
+        insertList(createList);
         break;
 
     case 2:
@@ -195,9 +207,10 @@ int edit_option;
     
     default:
         return;
-        break;
-    }
+        }
+    }while(edit_option > 0 && edit_option < 3);
 
+    return ;
 
 }
 
@@ -213,8 +226,7 @@ void insertList(FILE * createList)
     scanf("%s",newItem);
     fflush(stdin);
     fputs(newItem, createList);
-
-
+    fputs("\n",createList);
 
     headcreatedList = (itemsList*) malloc (sizeof (itemsList));
     headcreatedList -> next = NULL;
@@ -228,35 +240,111 @@ void insertList(FILE * createList)
 
         if(headcreatedList -> next == NULL)
         {
-            headcreatedList -> next = newItem;
+            headcreatedList -> next = createListItem;
         }
         else
         {
-            prevcreatedListItem -> next = newItem;
+            prevcreatedListItem -> next = createListItem;
         }
-        prevcreatedListItem = newItem;
+        prevcreatedListItem = createListItem;
     }
 
-createListItem = headcreatedList -> next;
+    createListItem = headcreatedList -> next;
 
 
-while(createListItem -> item != NULL)
-{
-    printf("%s\n", createListItem -> item);
-    createListItem = createListItem -> next;
+    while(createListItem -> item != NULL)
+    {
+        printf("%s\n", createListItem -> item);
+        createListItem = createListItem -> next;
+    }
+
+    free(createListItem);
+    free(prevcreatedListItem);
+    free(headcreatedList);
+
+    fclose(createList);
+
+    return ;
 }
-
-free(createListItem);
-free(prevcreatedListItem);
-free(headcreatedList);
-
-fclose(createList);
-
-    return 0;
-}
-
 
 void removeList(FILE * createList){
 
-    return;
+    char removeItem[20], row[20];
+    //int option;
+    itemsList * removeItemHead = NULL, *removeItemPrev = NULL, * removeListitem = NULL;
+
+    printf("Items da sua lista!!\n");
+
+    createList = fopen("ShoppingList.txt", "r");
+
+   // printf("Entrou no head\n");
+    removeItemHead = (itemsList*) malloc (sizeof (itemsList));
+    removeItemHead -> next = NULL;
+
+    while(fgets(row,sizeof(row),createList) != NULL)
+    {
+       // printf("Entrou no while\n");
+    removeListitem = (itemsList*) malloc (sizeof (itemsList));
+    removeListitem -> next = NULL;
+    strcpy(removeListitem -> item, row);
+
+        if(removeItemHead -> next == NULL)
+            removeItemHead -> next = removeListitem;
+        
+        else
+            removeItemPrev -> next = removeListitem;
+        
+        
+        removeItemPrev = removeListitem;
+    }
+
+    fclose(createList);
+    //printf("Fechou o arquivo\n");
+
+    removeListitem = removeItemHead -> next;
+
+   // printf("Vai printar o item da lista\n");
+    while(removeListitem -> item != NULL)
+    {
+    printf("%s", removeListitem -> item);
+    removeListitem = removeListitem -> next;
+    }
+
+    printf("\n Qual item a ser retirado da lista de compras?\n");
+    scanf("%s",removeItem);
+    fflush(stdin);
+ 
+    
+    removeListitem = removeItemHead -> next;
+    removeItemPrev = removeItemHead;
+
+    while(removeListitem -> item != NULL){
+
+        if(strcmp(removeItem, removeListitem -> item) == 0)
+        {
+            
+        removeItemPrev -> next = removeListitem -> next;
+        free(removeListitem);
+        printf("Item retirado com sucesso!!\n");
+        break;
+
+        }else
+        removeItemPrev = removeListitem;
+        removeListitem = removeListitem -> next;
+    }
+
+    createList = fopen("ShoppingList.txt", "w+");
+
+    removeListitem = removeItemHead -> next;
+    
+    while(removeListitem -> next != NULL)
+    {
+        fputs(removeListitem -> item, createList);
+        removeListitem = removeListitem -> next;
+    }
+
+    fclose(createList);
+
+    
+   return;
 }
